@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Simple Vue.js Calculator demo">
+    <meta name="author" content="Mike Sprague">
+    <title>Simple Demo Calculator | &lt;/&gt; by Isaac Muturi</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/lumen/bootstrap.min.css" rel="stylesheet" integrity="sha384-gv0oNvwnqzF6ULI9TVsSmnULNb3zasNysvWwfT/s4l8k5I+g6oFz9dye0wg3rQ2Q" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
+    <style>
+      * {
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;a
+        -moz-osx-font-smoothing: grayscale;
+      }
+      html {
+        position: relative;
+        min-height: 100%;
+      }
+      body {
+        margin-bottom: 60px;
+        background-color: #2b3e50;
+      }
+      body, p, h1, h2, h3, h4, h5, .btn, button {
+        font-family: -apple-system, BlinkMacSystemFont,
+          "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
+          "Fira Sans", "Droid Sans", "Helvetica Neue",
+          sans-serif;
+      }
+      body, p, h1, h2, h3, h4, h5 {
+        color: #b8bdc2;
+      }
+      .calc-history {
+        min-height: 1em;
+        margin-right: 1em;
+      }
+      .calc-display {
+        font-family: "Orbitron", sans-serif;
+        font-size: 2.5em;
+        line-height: 3em;
+        margin-bottom: 0.5em;
+      }
+      .calc-row {
+        margin: 20px 0;
+      }
+      .panel {
+        border-color: #485563 !important;
+      }
+      .panel-heading {
+        background-color: #4E5D6C !important;
+        color: #b8bdc2 !importantl;
+      }
+      .footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 60px;
+      }
+    </style>
+    <!--[if lt IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js" integrity="sha256-3Jy/GbSLrg0o9y5Z5n1uw0qxZECH7C6OQpVBgNFYa0g=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js" integrity="sha256-g6iAfvZp+nDQ2TdTR/VVKJf3bGro4ub5fvWSWVRi2NE=" crossorigin="anonymous"></script>
+    <![endif]-->
+  </head>
+  <body>
+
+    <header class="container">
+      <div class="page-header">
+        <h1>Simple Calculator VueJS</h1>
+      </div>
+    </header>
+
+    <div class="container" id="app" @keyup.48="doCalcButton( 0, $event )" @keyup.49="doCalcButton( 1, $event )" @keyup.50="doCalcButton( 2, $event )"
+      @keyup.51="doCalcButton( 3, $event )" @keyup.52="doCalcButton( 4, $event )" @keyup.53="doCalcButton( 5, $event )" @keyup.54="doCalcButton( 6, $event )"
+      @keyup.55="doCalcButton( 7, $event )" @keyup.56="doCalcButton( 8, $event )" @keyup.57="doCalcButton( 9, $event )" @keyup.187="doCalcButton( '+', $event )"
+      @keyup.189="doCalcButton( '-', $event )" @keyup.88="doCalcButton( '*', $event )" @keyup.191="doCalcButton( '/', $event )" @keyup.enter="doTotal"
+      @keyup.190="doCalcButton( '.', $event )" @keyup.67="clearEntry( $event )" @keyup.delete="backspace"
+    >
+      <div class="row">
+        <div class="col-sm-4 col-sm-offset-4 col-xs-12">
+
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <small class="help-block text-right calc-history">{{ calcHistoryDisplay }}</small>
+              <input class="form-control input-lg calc-display text-right" type="text" v-model="calcDisplay" placeholder="0" maxlength="10" readonly>
+            </div>
+            <div class="panel-body">
+              <div class="row calc-row">
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-danger" @click="clearEntry( $event )">CE</button>
+                </div>
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-danger" @click="clearAll">C</button>
+                </div>
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-primary" @click="backspace">&larr;</button>
+                </div>
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-primary" @click="doCalcButton( '/', $event )">&divide;</button>
+                </div>
+              </div>
+              <div class="row calc-row">
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-default" @click="doCalcButton( 7, $event )">7</button>
+                </div>
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-default" @click="doCalcButton( 8, $event )">8</button>
+                </div>
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-default" @click="doCalcButton( 9, $event )">9</button>
+                </div>
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-primary" @click="doCalcButton( '*', $event )">&times;</button>
+                </div>
+              </div>
+              <div class="row calc-row">
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-default" @click="doCalcButton( 4, $event )">4</button>
+                </div>
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-default" @click="doCalcButton( 5, $event )">5</button>
+                </div>
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-default" @click="doCalcButton( 6, $event )">6</button>
+                </div>
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-primary" @click="doCalcButton( '-', $event )">&minus;</button>
+                </div>
+              </div>
+              <div class="row calc-row">
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-default" @click="doCalcButton( 1, $event )">1</button>
+                </div>
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-default" @click="doCalcButton( 2, $event )">2</button>
+                </div>
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-default" @click="doCalcButton( 3, $event )">3</button>
+                </div>
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-primary" @click="doCalcButton( '+', $event )">&plus;</button>
+                </div>
+              </div>
+              <div class="row calc-row">
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-primary" @click="plusMinus">&plusmn;</button>
+                </div>
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-default" @click="doCalcButton( 0, $event )">0</button>
+                </div>
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-default" @click="doCalcButton( '.', $event )">&period;</button>
+                </div>
+                <div class="col-xs-3">
+                  <button class="btn btn-lg btn-block btn-primary" @click="doTotal">&equals;</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="container">
+        <p class="text-muted text-center">
+          Proudly by <a href="https://www.afrismashtech.co.ke" target="_blank">Isaac Muturi</a>.
+        </p>
+      </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.6/vue.js" integrity="sha256-MbKnwYm5PqnQ9xLd0vK2C8vDJZA+PXKuNlmgJc+BG48=" crossorigin="anonymous"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.6/vue.min.js" integrity="sha256-WcJDyxpvFLMHHA7kQuvbE5kWgRwV3zukWdjvbTUcXh8=" crossorigin="anonymous"></script> -->
+    <script>
+      var app = new Vue({
+        el: "#app",
+        data: {
+          calcTotal: 0,
+          currentEntry: [],
+          calcHistory: [],
+          lastEntry: null,
+          laseOperation: null,
+          operators: [ "+", "-", "*", "/" ]
+        },
+        mounted: function() {
+          this.focusDisplay();
+        },
+        methods: {
+          focusDisplay: function() {
+            document.getElementsByClassName( "calc-display" )[0].focus();
+          },
+          clearBuffer: function() {
+            this.lastEntry = this.parseAsString( this.currentEntry );
+            this.currentEntry = [];
+          },
+          getBuffer: function() {
+            return this.currentEntry;
+          },
+          setBuffer: function( val ) {
+            this.getBuffer().push( val );
+          },
+          clearHistory: function() {
+            this.calcHistory = [];
+          },
+          getHistory: function() {
+            return this.calcHistory;
+          },
+          setHistory: function( val ) {
+            this.getHistory().push( val );
+          },
+          parseAsString: function( arr ) {
+            return arr.join( "" );
+          },
+          parseAsFloat: function( arr ) {
+            return parseFloat( arr.join( "" ) );
+          },
+          plusMinus: function() {
+            if ( this.currentEntry.length && this.currentEntry !== 0 ) {
+              var buffer = this.parseAsFloat( this.getBuffer() );
+              this.clearBuffer();
+              this.setBuffer( buffer * -1 );
+            }
+            this.focusDisplay();
+          },
+          backspace: function() {
+            if ( this.getBuffer().length > 1 ) {
+              this.getBuffer().pop();
+            } else if ( this.getBuffer().length === 1 ) {
+              this.clearBuffer();
+              this.setBuffer( '0' );
+            }
+            this.focusDisplay();
+          },
+          clearEntry: function( event ) {
+            if ( event.shiftKey ) {
+              this.clearAll();
+            } else if ( this.getBuffer().length ) {
+              this.clearBuffer();
+              this.focusDisplay();
+            }
+          },
+          clearAll: function() {
+            this.calcTotal = 0;
+            this.calcHistory = [];
+            this.currentEntry = [];
+            this.lastEntry = null;
+            this.laseOperation = null;
+            this.focusDisplay();
+          },
+          doTotal: function() {
+            if ( this.getHistory()[this.getHistory().length - 1] !== "=" ) {
+              this.clearBuffer();
+              this.setHistory( this.lastEntry );
+              this.calcTotal = eval( this.parseAsString( this.getHistory() ));
+              this.setHistory( "=" );
+              if ( this.calcTotal == "Infinity" ) {
+                this.clearAll();
+                this.calcTotal = "Err"
+                this.setBuffer( this.calcTotal );
+              } else {
+                this.setBuffer( this.calcTotal );
+              }
+            }
+          },
+          doOperator: function( btnOperation ) {
+            this.clearBuffer();
+            if ( this.lastEntry.trim().length ) {
+              this.setHistory( this.lastEntry );
+            }
+            this.setHistory( btnOperation );
+          },
+          doCalcButton: function( btnOperation, event ) {
+            if ( this.getHistory().length && this.getHistory()[this.getHistory().length - 1] === "=" ) {
+              this.clearHistory();
+              this.clearBuffer();
+              if ( this.lastEntry.trim().length ) {
+                this.setHistory( this.lastEntry );
+              }
+            }
+            if ( btnOperation === "." ) {
+              // decimal button
+              if ( this.lastEntry === null) {
+                this.currentEntry.push( "0." );
+              } else if ( this.lastEntry.length && this.lastEntry.indexOf( "." ) === -1 ) {
+                this.currentEntry.push( "." );
+              } else if ( !lastEntry.length ) {
+                this.currentEntry.push( "0." );
+              }
+            } else if ( this.operators.includes( btnOperation )) {
+              // mathematical operator button or equals
+              if ( btnOperation === "+" && event.shiftKey ) {
+                this.doOperator( "+" );
+              } else if ( btnOperation === "+" ) {
+                if ( this.getHistory()[this.getHistory().length - 1] !== "=" ) {
+                  this.doTotal();
+                }
+              } else {
+                this.doOperator( btnOperation );
+              }
+            } else {
+              // numeric button or multiply (shift + 8)
+              if ( btnOperation === 8 && event.shiftKey ) {
+                this.doOperator( "*" );
+              } else {
+                this.setBuffer( btnOperation );
+                this.lastEntry = btnOperation;
+              }
+            }
+            this.focusDisplay();
+          }
+        },
+        computed: {
+          calcHistoryDisplay: function() {
+            var returnValue = "";
+            for (var i = 0; i < this.calcHistory.length; i++ ) {
+              returnValue += " " + this.calcHistory[i];
+            }
+            return returnValue;
+          },
+          calcDisplay: function() {
+            if ( this.getBuffer().length ) {
+              return this.parseAsString( this.getBuffer() );
+            }
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
